@@ -64,6 +64,32 @@ Host
 
 ---
 
+# Discord Bot Setup
+
+Before running the bot you need to create a Discord application and invite it to your server.
+
+**1. Create the application:**
+- Go to [discord.com/developers/applications](https://discord.com/developers/applications) and click **New Application**
+- Give it a name, then go to the **Bot** tab
+- Click **Reset Token** and copy the token — this is your `DISCORD_TOKEN`
+- Under **Privileged Gateway Intents**, enable **Server Members Intent** (required for role checks)
+
+**2. Invite the bot to your server:**
+- Go to the **OAuth2 → URL Generator** tab
+- Under **Scopes**, select `bot`
+- Under **Bot Permissions**, select:
+  - `Read Messages / View Channels`
+  - `Send Messages`
+  - `Send Messages in Threads`
+  - `Read Message History`
+- Copy the generated URL, open it in a browser, and select your Discord server
+
+**3. Get channel IDs:**
+- In Discord settings, go to **Advanced** and enable **Developer Mode**
+- Right-click any channel and select **Copy Channel ID**
+
+---
+
 # Requirements and Setup
 
 ## Docker (recommended)
@@ -115,23 +141,55 @@ python3 pzwatcher.py  # Log watcher bot
 
 # Configuration
 
-Copy `.env.sample` to `.env` and fill in all values. To get channel IDs, enable Developer Mode in Discord, then right-click a channel and select "Copy ID".
+Copy `.env.sample` to `.env` and fill in all values.
+
+## Discord
 
 | Variable | Description |
 |---|---|
-| `RCON_PASS` | RCON password (must match server config) |
-| `RCON_SERVER` | RCON hostname — use `projectzomboid` (container name) when running in Docker |
+| `DISCORD_TOKEN` | Bot token from the Discord Developer Portal |
+| `DISCORD_GUILD` | Name of your Discord server |
+
+## RCON
+
+| Variable | Description |
+|---|---|
+| `RCON_PASS` | RCON password — must match `RCON_PASSWORD` set on the PZ server |
+| `RCON_SERVER` | RCON hostname — use `projectzomboid` (container name) in Docker, or `127.0.0.1` for manual |
 | `RCON_PORT` | RCON port (default: `27015`) |
-| `DISCORD_TOKEN` | Discord bot token |
-| `DISCORD_GUILD` | Discord server name |
-| `ADMIN_ROLES` | Comma-separated role names for admin commands |
-| `MODERATOR_ROLES` | Comma-separated role names for moderator commands |
-| `WHITELIST_ROLES` | Roles allowed to self-register via `!pzrequestaccess` |
-| `LOG_PATH` | Path to PZ server `Logs/` directory — use `/project-zomboid-config/Logs` in Docker |
-| `NOTIFICATION_CHANNEL` | Channel ID for join/leave/death notifications |
-| `INGAME_CHANNEL` | Channel ID attached to the in-game chat |
-| `IGNORE_CHANNELS` | Comma-separated channel names where commands are blocked |
-| `SERVER_ADDRESS` | Shown to players after whitelist access is granted |
+
+## Roles
+
+The bot uses your Discord server's **role names** (not IDs) to gate commands. Roles are matched by name, case-sensitively.
+
+| Variable | Who it applies to | What it grants |
+|---|---|---|
+| `ADMIN_ROLES` | Comma-separated list of role names, e.g. `Admin` or `Admin,ServerOwner` | Full access: server restart, changing player access levels |
+| `MODERATOR_ROLES` | Comma-separated list of role names, e.g. `Moderator,Helper` | Moderation commands: bans, kicks, whitelist management, teleport, give items |
+| `WHITELIST_ROLES` | Comma-separated list of role names, e.g. `Survivor` | Can run `!pzrequestaccess` to self-register an account on the PZ server |
+
+Users with an `ADMIN_ROLES` role do **not** automatically get moderator commands — add them to both lists if needed:
+```
+ADMIN_ROLES="Admin"
+MODERATOR_ROLES="Admin,Moderator"
+```
+
+All other Discord members (no matching role) can only run the read-only `UserCommands` (`!pzplayers`, `!pzplaytime`, etc.).
+
+## Channels
+
+| Variable | Description |
+|---|---|
+| `NOTIFICATION_CHANNEL` | Channel ID where join, leave, and death events are posted by `pzwatcher.py` |
+| `INGAME_CHANNEL` | (Optional) Channel ID attached to in-game chat. Leave unset if using PZ's built-in Discord integration |
+| `IGNORE_CHANNELS` | Comma-separated channel **names** where bot commands are silently blocked |
+
+## Other
+
+| Variable | Description |
+|---|---|
+| `LOG_PATH` | Path to the PZ server `Logs/` directory — use `/project-zomboid-config/Logs` in Docker |
+| `SERVER_ADDRESS` | Connection address shown to players after `!pzrequestaccess` (e.g. `1.2.3.4:16261`) |
 | `PZ_CONTAINER_NAME` | Docker container name of the PZ server (default: `projectzomboid`) |
 
 ---
