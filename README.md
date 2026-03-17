@@ -242,9 +242,12 @@ UserCommands:
 ```
 
 ## Get a server option
-Fuzzy lookup for a specific server option:
+Fuzzy lookup for a specific server option, or omit the argument to return all options:
 ```
 !pzgetoption zombie
+```
+```
+!pzgetoption
 ```
 ```
 Server options:

@@ -547,19 +547,19 @@ class UserCommands(commands.Cog):
         """Get the value of a server option"""
         await IsChannelAllowed(ctx)
         cmd_split = ctx.message.content.split()
-        option_find = ""
-        try:
-            option_find = cmd_split[1]
-        except IndexError as ie:
-            response = f"Invalid command. Try !pzgetoption OPTIONNAME"
-            await ctx.send(response)
+        option_find = cmd_split[1] if len(cmd_split) > 1 else None
+        copt = await rcon_command(ctx, 'showoptions')
+        if not copt:
             return
-        copt = await rcon_command(ctx,'showoptions')
         copt_split = copt.split('\n')
-        match = list(filter(lambda x: option_find.lower() in x.lower(), copt_split))
-        match = '\n'.join(list(map(lambda x: x.replace('* ',''),match)))
+        if option_find:
+            match = list(filter(lambda x: option_find.lower() in x.lower(), copt_split))
+        else:
+            match = copt_split
+        match = '\n'.join(list(map(lambda x: x.replace('* ', ''), match)))
         results = f"Server options:\n{match}"
-        await ctx.send(results)
+        for chunk in [results[i:i+1900] for i in range(0, len(results), 1900)]:
+            await ctx.send(chunk)
 
 
     @commands.command(pass_context=True)
