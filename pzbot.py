@@ -185,17 +185,15 @@ async def getalldeaths(ctx):
 
 
 async def getmods():
-    response = await rcon_command(None, ["getoptions"])
+    response = await rcon_command(None, "showoptions")
     if not response:
         return ""
-    modlist = []
     for line in response.splitlines():
-        if line.startswith("Mods="):
-            mods = line.split("=", 1)[1].strip()
-            if mods:
-                modlist = [m for m in mods.split(";") if m.strip()]
-            break
-    return "\n".join(modlist)
+        clean = line.replace("* ", "").strip()
+        if clean.startswith("Mods="):
+            mods = clean.split("=", 1)[1].strip()
+            return "\n".join(m for m in mods.split(";") if m.strip())
+    return ""
 
 
 async def lookupsteamid(name):
