@@ -47,6 +47,7 @@ Server communication uses `SourceRcon` (TCP socket, Valve RCON protocol) to issu
 | `NOTIFICATION_CHANNEL` / `INGAME_CHANNEL` | Discord channel IDs |
 | `IGNORE_CHANNELS` | Comma-separated channel names where commands are blocked |
 | `PZ_CONTAINER_NAME` | Docker container name for the PZ server (default: `projectzomboid`) |
+| `SERVER_NAME` | Server config name without extension (default: `pzserver`); used to find `Server/<SERVER_NAME>.ini` |
 | `SERVER_ADDRESS` | Shown to players after whitelist access is granted |
 
 ## Docker Deployment

@@ -37,6 +37,7 @@ MODERATOR_ROLES = os.getenv('MODERATOR_ROLES')
 WHITELIST_ROLES = os.getenv('WHITELIST_ROLES')
 LOG_PATH = os.getenv('LOG_PATH', "/project-zomboid-config/Logs")
 PZ_CONTAINER_NAME = os.getenv('PZ_CONTAINER_NAME', 'projectzomboid')
+SERVER_NAME = os.getenv('SERVER_NAME', 'pzserver')
 ADMIN_ROLES = [r.strip() for r in ADMIN_ROLES.split(',')]
 MODERATOR_ROLES = [r.strip() for r in MODERATOR_ROLES.split(',')]
 WHITELIST_ROLES = [r.strip() for r in WHITELIST_ROLES.split(',')]
@@ -185,7 +186,7 @@ async def getalldeaths(ctx):
 
 async def getmods():
     modlist = list()
-    with open(os.path.join(os.path.split(LOG_PATH)[0],"Server","servertest.ini"), 'r') as file:
+    with open(os.path.join(os.path.split(LOG_PATH)[0],"Server",f"{SERVER_NAME}.ini"), 'r') as file:
         for line in file:
             if "Mods=" in line:
                 mods_split = line.split("=")

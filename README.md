@@ -192,6 +192,7 @@ All other Discord members (no matching role) can only run the read-only `UserCom
 | `LOG_PATH` | Path to the PZ server `Logs/` directory — use `/project-zomboid-config/Logs` in Docker |
 | `SERVER_ADDRESS` | Connection address shown to players after `!pzrequestaccess` (e.g. `1.2.3.4:16261`) |
 | `PZ_CONTAINER_NAME` | Docker container name of the PZ server (default: `projectzomboid`) |
+| `SERVER_NAME` | Server config file name without extension (default: `pzserver`). Used to locate `<SERVER_NAME>.ini` in the `Server/` directory. Set to match your server's `SERVER_NAME` env var (e.g. `pzserver` → `Server/pzserver.ini`) |
 
 ---
 
