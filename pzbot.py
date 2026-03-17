@@ -25,6 +25,7 @@ import docker
 import time
 from datetime import datetime
 from SourceRcon import SourceRcon
+from file_read_backwards import FileReadBackwards
 # Setup environment
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -522,6 +523,46 @@ class ModeratorCommands(commands.Cog):
         else:
             response = f"{ctx.author}, you don't have admin rights."
         await ctx.send(response)  
+
+
+    @commands.command(pass_context=True)
+    async def pzlasterrors(self, ctx, count: int = 30):
+        """Show last N errors from server logs (default: 30)"""
+        await IsChannelAllowed(ctx)
+        if not await IsMod(ctx):
+            await ctx.send(f"{ctx.author}, you don't have admin rights.")
+            return
+
+        log_files = []
+        for root, dirs, files in os.walk(LOG_PATH):
+            for f in files:
+                if f.endswith('.txt'):
+                    path = os.path.join(root, f)
+                    log_files.append((os.path.getmtime(path), path))
+        log_files.sort(reverse=True)
+
+        errors = []
+        for _, path in log_files:
+            if len(errors) >= count:
+                break
+            try:
+                with FileReadBackwards(path) as frb:
+                    for line in frb:
+                        if len(errors) >= count:
+                            break
+                        if 'ERROR' in line:
+                            errors.append(line.strip())
+            except Exception:
+                continue
+
+        if not errors:
+            await ctx.send("No errors found in logs.")
+            return
+
+        errors.reverse()
+        result = f"Last {len(errors)} errors:\n" + "\n".join(errors)
+        for chunk in [result[i:i+1900] for i in range(0, len(result), 1900)]:
+            await ctx.send(f"```\n{chunk}\n```")
 
 
 class UserCommands(commands.Cog):

@@ -212,6 +212,7 @@ ModeratorCommands:
   pzsteamban      Steam ban a user
   pzsteamunban    Steam unban a user
   pzteleport      Teleport a user to another user
+  pzlasterrors    Show last N errors from server logs (default: 30)
   pzunwhitelist   Remove a whitelisted user
   pzwhitelist     Whitelist a user
   pzwhitelistall  Whitelist all active users
