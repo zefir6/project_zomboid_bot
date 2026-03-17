@@ -526,12 +526,15 @@ class ModeratorCommands(commands.Cog):
 
 
     @commands.command(pass_context=True)
-    async def pzlasterrors(self, ctx, count: int = 30):
-        """Show last N errors from server logs (default: 30)"""
+    async def pzlasterrors(self, ctx, count: int = 10):
+        """Show last N errors from server logs (default: 10)"""
         await IsChannelAllowed(ctx)
         if not await IsMod(ctx):
             await ctx.send(f"{ctx.author}, you don't have admin rights.")
             return
+
+        import re
+        log_header = re.compile(r'^[A-Z]+\s*:')
 
         log_files = []
         for root, dirs, files in os.walk(LOG_PATH):
@@ -546,12 +549,18 @@ class ModeratorCommands(commands.Cog):
             if len(errors) >= count:
                 break
             try:
+                current_continuation = []
                 with FileReadBackwards(path) as frb:
                     for line in frb:
-                        if len(errors) >= count:
-                            break
-                        if 'ERROR' in line:
-                            errors.append(line.strip())
+                        if log_header.match(line):
+                            if line.startswith('ERROR'):
+                                block = [line] + list(reversed(current_continuation))
+                                errors.append('\n'.join(block))
+                                if len(errors) >= count:
+                                    break
+                            current_continuation = []
+                        else:
+                            current_continuation.append(line)
             except Exception:
                 continue
 
@@ -560,9 +569,10 @@ class ModeratorCommands(commands.Cog):
             return
 
         errors.reverse()
-        result = f"Last {len(errors)} errors:\n" + "\n".join(errors)
-        for chunk in [result[i:i+1900] for i in range(0, len(result), 1900)]:
-            await ctx.send(f"```\n{chunk}\n```")
+        for i, error in enumerate(errors, 1):
+            header = f"**Error {i}/{len(errors)}:**"
+            body = f"```\n{error[:1850]}\n```"
+            await ctx.send(f"{header}\n{body}")
 
 
 class UserCommands(commands.Cog):
