@@ -92,5 +92,9 @@ async def PlayerCheck(lfile, channel):
 
 
 
-client.loop.create_task(logwatcher())
-client.run(TOKEN)
+async def main():
+    async with client:
+        asyncio.ensure_future(logwatcher())
+        await client.start(TOKEN)
+
+asyncio.run(main())
