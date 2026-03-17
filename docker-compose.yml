@@ -10,7 +10,6 @@ services:
     environment:
       CONTAINERS: 1
       ALLOW_RESTARTS: 1
-      POST: 0
     networks:
       - proxy-network
 
