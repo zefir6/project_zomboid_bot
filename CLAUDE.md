@@ -51,13 +51,13 @@ Server communication uses `SourceRcon` (TCP socket, Valve RCON protocol) to issu
 
 ## Docker Deployment
 
-The bot runs in a Docker container alongside the PZ server container. Both share a Docker network (`pz-network`) so the bot can reach RCON at `projectzomboid:27015` without publishing ports.
+The bot runs in a Docker container alongside the PZ server container. Both share a Docker network (`zomboid_zomboid`) so the bot can reach RCON at `projectzomboid:27015` without publishing ports.
 
 A `tecnativa/docker-socket-proxy` sidecar limits Docker socket access to container inspection and restarts only.
 
 ```bash
 # Create the shared network (if the PZ server container doesn't create it)
-docker network create pz-network
+docker network create zomboid_zomboid
 
 # Build and start
 docker compose up -d

@@ -44,14 +44,14 @@ Two processes run inside a single Docker container:
 - **`pzbot.py`** — handles all commands, RCON communication, and bot status updates
 - **`pzwatcher.py`** — watches log files and reports join/leave/death events to Discord channels
 
-The bot connects to the PZ server via RCON over the shared Docker network (`pz-network`). Server restarts are performed via the Docker SDK (through a restricted socket proxy) rather than systemd or shell commands.
+The bot connects to the PZ server via RCON over the shared Docker network (`zomboid_zomboid`). Server restarts are performed via the Docker SDK (through a restricted socket proxy) rather than systemd or shell commands.
 
 ```
 Host
 ├── /var/run/docker.sock
 │
 └── Docker
-    ├── pz-network (external, shared)
+    ├── zomboid_zomboid (external, shared)
     │   ├── projectzomboid   ← PZ server (indifferentbroccoli image)
     │   │   └── RCON :27015 (internal only)
     │   └── pz-bot           ← this bot
@@ -98,7 +98,7 @@ Before running the bot you need to create a Discord application and invite it to
 
 **1. Create the shared Docker network** (skip if it already exists):
 ```bash
-docker network create pz-network
+docker network create zomboid_zomboid
 ```
 
 **2. Clone and configure:**

@@ -25,13 +25,13 @@ services:
     volumes:
       - ./server-data:/project-zomboid-config:ro
     networks:
-      - pz-network
+      - zomboid_zomboid
       - proxy-network
     depends_on:
       - docker-socket-proxy
 
 networks:
-  pz-network:
+  zomboid_zomboid:
     external: true   # shared with the PZ server container
   proxy-network:
     driver: bridge   # internal network: bot <-> proxy only
