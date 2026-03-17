@@ -185,7 +185,7 @@ async def getalldeaths(ctx):
 
 
 async def getmods():
-    response = await rcon_command(None, "showoptions")
+    response = await rcon_command(None, ["showoptions"])
     if not response:
         return ""
     for line in response.splitlines():
@@ -546,7 +546,7 @@ class UserCommands(commands.Cog):
         await IsChannelAllowed(ctx)
         cmd_split = ctx.message.content.split()
         option_find = cmd_split[1] if len(cmd_split) > 1 else None
-        copt = await rcon_command(ctx, 'showoptions')
+        copt = await rcon_command(ctx, ['showoptions'])
         if not copt:
             return
         copt_split = copt.split('\n')
