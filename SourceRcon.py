@@ -41,7 +41,7 @@ SERVERDATA_RESPONSE_VALUE = 0
 MAX_COMMAND_LENGTH=510 # found by trial & error
 
 MIN_MESSAGE_LENGTH=4+4+1+1 # command (4), id (4), string1 (1), string2 (1)
-MAX_MESSAGE_LENGTH=4+4+4096+1 # command (4), id (4), string (4096), string2 (1)
+MAX_MESSAGE_LENGTH=4+4+65536+1 # command (4), id (4), string (65536), string2 (1); PZ sends large responses
 
 # there is no indication if a packet was split, and they are split by lines
 # instead of bytes, so even the size of split packets is somewhat random.
