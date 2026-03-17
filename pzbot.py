@@ -562,19 +562,18 @@ class UserCommands(commands.Cog):
 
     @commands.command(pass_context=True)
     async def pzdeathcount(self, ctx):
-        """Get the total death count of a player"""
+        """Get the total death count of a player, or all players sorted by deaths"""
         await IsChannelAllowed(ctx)
         cmd_split = ctx.message.content.split()
-        option_find = ""
-        try:
-            username = cmd_split[1]
-        except IndexError as ie:
-            response = f"Invalid command. Try !pzdeathcount USERNAME"
-            await ctx.send(response)
-            return
-        dc = await GetDeathCount(ctx, username)
-        results = dc
-        await ctx.send(results)
+        if len(cmd_split) > 1:
+            dc = await GetDeathCount(ctx, cmd_split[1])
+            await ctx.send(dc)
+        else:
+            dc = await getalldeaths(ctx)
+            results = dc.split('\n')
+            clist = chunks(results, 100)
+            async for c in clist:
+                await ctx.send('\n'.join(c))
 
     @commands.command(pass_context=True)
     async def pzplaytime(self, ctx):
