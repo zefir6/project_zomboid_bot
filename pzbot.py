@@ -37,8 +37,9 @@ MODERATOR_ROLES = os.getenv('MODERATOR_ROLES')
 WHITELIST_ROLES = os.getenv('WHITELIST_ROLES')
 LOG_PATH = os.getenv('LOG_PATH', "/project-zomboid-config/Logs")
 PZ_CONTAINER_NAME = os.getenv('PZ_CONTAINER_NAME', 'projectzomboid')
-ADMIN_ROLES = ADMIN_ROLES.split(',')
-WHITELIST_ROLES = WHITELIST_ROLES.split(',')
+ADMIN_ROLES = [r.strip() for r in ADMIN_ROLES.split(',')]
+MODERATOR_ROLES = [r.strip() for r in MODERATOR_ROLES.split(',')]
+WHITELIST_ROLES = [r.strip() for r in WHITELIST_ROLES.split(',')]
 IGNORE_CHANNELS = os.getenv('IGNORE_CHANNELS')
 ALLOWED_CHANNELS = os.getenv('ALLOWED_CHANNELS')
 SERVER_ADDRESS = os.getenv('SERVER_ADDRESS')
@@ -207,12 +208,10 @@ async def lookupsteamid(name):
                                 return line.split()[2]
     
 async def IsAdmin(ctx):
-    is_present = [i for i in ctx.author.roles if i.name in ADMIN_ROLES]
-    return is_present
+    return [i for i in ctx.author.roles if i.name in ADMIN_ROLES]
 
 async def IsMod(ctx):
-    is_present = [i for i in ctx.author.roles if i.name in MODERATOR_ROLES]
-    return is_present
+    return [i for i in ctx.author.roles if i.name in MODERATOR_ROLES or i.name in ADMIN_ROLES]
 
 async def IsServerRunning():
     try:
@@ -312,7 +311,7 @@ class AdminCommands(commands.Cog):
         """Restart the PZ server"""
         await IsChannelAllowed(ctx)
         if await IsAdmin(ctx):
-            bot.loop.create_task(restart_server(ctx))
+            asyncio.create_task(restart_server(ctx))
 
 class ModeratorCommands(commands.Cog):
     """Moderator Server Commands"""
@@ -675,7 +674,7 @@ async def setup_hook():
 
 @bot.event
 async def on_ready():
-    bot.loop.create_task(status_task())
+    asyncio.create_task(status_task())
 
 print("Starting bot")
 bot.run(TOKEN)
