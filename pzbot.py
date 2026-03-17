@@ -534,7 +534,9 @@ class ModeratorCommands(commands.Cog):
             return
 
         import re
-        log_header = re.compile(r'^[A-Z]+\s*:')
+        # Lines look like: [17-03-26 22:30:12.750] ERROR: General ...
+        # Continuation lines are indented (no leading bracket)
+        log_header = re.compile(r'^\[\d{2}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+\] ([A-Z]+)\s*:')
 
         log_files = []
         search_dirs = [LOG_PATH, os.path.dirname(LOG_PATH)]
@@ -557,10 +559,11 @@ class ModeratorCommands(commands.Cog):
                 with open(path, 'r', errors='replace') as f:
                     for line in f:
                         line = line.rstrip('\n')
-                        if log_header.match(line):
+                        m = log_header.match(line)
+                        if m:
                             if current_block is not None:
                                 file_errors.append('\n'.join(current_block))
-                            if line.startswith('ERROR'):
+                            if m.group(1) == 'ERROR':
                                 current_block = [line]
                             else:
                                 current_block = None
