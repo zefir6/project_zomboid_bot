@@ -544,31 +544,40 @@ class ModeratorCommands(commands.Cog):
                     log_files.append((os.path.getmtime(path), path))
         log_files.sort(reverse=True)
 
-        errors = []
+        print(f"pzlasterrors: found {len(log_files)} log files in {LOG_PATH}")
+
+        all_errors = []
         for _, path in log_files:
-            if len(errors) >= count:
-                break
+            file_errors = []
+            current_block = None
             try:
-                current_continuation = []
-                with FileReadBackwards(path) as frb:
-                    for line in frb:
+                with open(path, 'r', errors='replace') as f:
+                    for line in f:
+                        line = line.rstrip('\n')
                         if log_header.match(line):
+                            if current_block is not None:
+                                file_errors.append('\n'.join(current_block))
                             if line.startswith('ERROR'):
-                                block = [line] + list(reversed(current_continuation))
-                                errors.append('\n'.join(block))
-                                if len(errors) >= count:
-                                    break
-                            current_continuation = []
+                                current_block = [line]
+                            else:
+                                current_block = None
                         else:
-                            current_continuation.append(line)
-            except Exception:
+                            if current_block is not None:
+                                current_block.append(line)
+                    if current_block is not None:
+                        file_errors.append('\n'.join(current_block))
+            except Exception as e:
+                print(f"pzlasterrors: error reading {path}: {e}")
                 continue
+            print(f"pzlasterrors: {path} — {len(file_errors)} errors")
+            all_errors.extend(file_errors)
+
+        errors = all_errors[-count:]
 
         if not errors:
             await ctx.send("No errors found in logs.")
             return
 
-        errors.reverse()
         for i, error in enumerate(errors, 1):
             header = f"**Error {i}/{len(errors)}:**"
             body = f"```\n{error[:1850]}\n```"
