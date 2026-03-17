@@ -306,7 +306,7 @@ class AdminCommands(commands.Cog):
             response = f"{ctx.author}, you don't have admin rights."
         await ctx.send(response)
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, aliases=['pzrestart'])
     async def pzrestartserver(self, ctx):
         """Restart the PZ server"""
         await IsChannelAllowed(ctx)
@@ -671,6 +671,15 @@ async def setup_hook():
     await bot.add_cog(AdminCommands())
     await bot.add_cog(ModeratorCommands())
     await bot.add_cog(UserCommands())
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send(f"Unknown command. Try `!help` for a list of commands.")
+    elif isinstance(error, commands.CheckFailure):
+        pass  # already handled inside each command
+    else:
+        raise error
 
 @bot.event
 async def on_ready():
