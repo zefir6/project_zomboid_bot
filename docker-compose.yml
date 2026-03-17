@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    container_name: pz-docker-proxy
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: 1
+      ALLOW_RESTARTS: 1
+      POST: 0
+    networks:
+      - proxy-network
+
+  pz-bot:
+    build: .
+    container_name: pz-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DOCKER_HOST: tcp://docker-socket-proxy:2375
+    volumes:
+      - ./server-data:/project-zomboid-config:ro
+    networks:
+      - pz-network
+      - proxy-network
+    depends_on:
+      - docker-socket-proxy
+
+networks:
+  pz-network:
+    external: true   # shared with the PZ server container
+  proxy-network:
+    driver: bridge   # internal network: bot <-> proxy only

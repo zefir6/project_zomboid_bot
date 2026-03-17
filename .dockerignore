@@ -1,0 +1,5 @@
+.env
+.git
+*.service
+__pycache__
+*.pyc

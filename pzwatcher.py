@@ -20,9 +20,6 @@ from concurrent.futures import ThreadPoolExecutor
 import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
-from subprocess import Popen
-import glob
-import subprocess
 from file_read_backwards import FileReadBackwards
 import datetime
 # Setup environment

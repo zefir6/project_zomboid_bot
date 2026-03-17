@@ -20,13 +20,8 @@ from concurrent.futures import ThreadPoolExecutor
 import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
-from subprocess import Popen
-import glob
-import subprocess
-import psutil
-import schedule
 import random
-from subprocess import check_output, STDOUT
+import docker
 import time
 from datetime import datetime
 from SourceRcon import SourceRcon
@@ -40,15 +35,13 @@ GUILD = os.getenv('DISCORD_GUILD')
 ADMIN_ROLES = os.getenv('ADMIN_ROLES')
 MODERATOR_ROLES = os.getenv('MODERATOR_ROLES')
 WHITELIST_ROLES = os.getenv('WHITELIST_ROLES')
-LOG_PATH = os.getenv('LOG_PATH', "/home/steam/Zomboid/Logs")
-SERVER_PATH = os.getenv('SERVER_PATH', "C:\Program Files (x86)\Steam\steamapps\common\Project Zomboid Dedicated Server")
-RCON_PATH = os.getenv('RCON_PATH','./')
+LOG_PATH = os.getenv('LOG_PATH', "/project-zomboid-config/Logs")
+PZ_CONTAINER_NAME = os.getenv('PZ_CONTAINER_NAME', 'projectzomboid')
 ADMIN_ROLES = ADMIN_ROLES.split(',')
 WHITELIST_ROLES = WHITELIST_ROLES.split(',')
 IGNORE_CHANNELS = os.getenv('IGNORE_CHANNELS')
 SERVER_ADDRESS = os.getenv('SERVER_ADDRESS')
 NOTIFICATION_CHANNEL = os.getenv('NOTIFICATION_CHANNEL')
-RESTART_CMD = os.getenv('RESTART_CMD', 'sudo systemctl restart Project-Zomboid')
 
 try:
     IGNORE_CHANNELS = IGNORE_CHANNELS.split(',')
@@ -215,37 +208,40 @@ async def IsMod(ctx):
     return is_present
 
 async def IsServerRunning():
-    for proc in psutil.process_iter():
-        lname = proc.name().lower()
-        if "projectzomboid" in lname:
-           return True
-    return False
+    try:
+        client = docker.from_env()
+        container = client.containers.get(PZ_CONTAINER_NAME)
+        return container.status == "running"
+    except docker.errors.NotFound:
+        return False
+    except Exception as e:
+        print(f"Docker error in IsServerRunning: {e}")
+        return False
 
 async def restart_server(ctx):
-    await ctx.send("Shutting server down, please wait...")
-    await rcon_command(ctx,[f"save"])
-    co = check_output(RESTART_CMD, shell=True)
-    await ctx.send(f"Server restarted, it may take a minute to be fully ready")
-    server_down = False
-    while not server_down:
-        d = await rcon_command(ctx, [f"players"])
-        if "refused" in d:
-            server_down = True
-        await asyncio.sleep(5)
-    
-    if os.name == 'nt':
-        terminate_zom = '''wmic PROCESS where "name like '%java.exe%' AND CommandLine like '%zomboid.steam%'" Call Terminate'''
-        terminate_shell = '''wmic PROCESS where "name like '%cmd.exe%' AND CommandLine like '%StartServer64.bat%'" Call Terminate'''
-        check_output(terminate_zom, shell=True)
-        check_output(terminate_shell, shell=True)
-        server_start = [os.path.join(SERVER_PATH,"StartServer64.bat")]
-        p = Popen(server_start, creationflags=subprocess.CREATE_NEW_CONSOLE)
-        r = p.stdout.read()
-        r = r.decode("utf-8")
-    else:
-        check_output(RESTART_CMD, shell=True)
+    await ctx.send("Saving world and restarting server, please wait...")
+    await rcon_command(ctx, ["save"])
 
-    await ctx.send("Server restarted, it may take a minute to be fully ready")
+    try:
+        docker_client = docker.from_env()
+        container = docker_client.containers.get(PZ_CONTAINER_NAME)
+        container.restart(timeout=30)
+    except docker.errors.NotFound:
+        await ctx.send(f"Error: container '{PZ_CONTAINER_NAME}' not found.")
+        return
+    except Exception as e:
+        await ctx.send(f"Error restarting container: {e}")
+        return
+
+    await ctx.send("Container restarted. Waiting for RCON...")
+    server_up = False
+    while not server_up:
+        d = await rcon_command(ctx, ["players"])
+        if d and "refused" not in d:
+            server_up = True
+        await asyncio.sleep(5)
+
+    await ctx.send("Server is back online!")
 
 async def rcon_command(ctx, command):
     try:
