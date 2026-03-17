@@ -31,6 +31,7 @@ NOTIFICATION_CHANNEL = os.getenv('NOTIFICATION_CHANNEL')
 INGAME_CHANNEL = os.getenv('INGAME_CHANNEL')
 intents = discord.Intents.default()
 intents.members = True
+intents.message_content = True
 client = discord.Client(intents=intents)
 
 

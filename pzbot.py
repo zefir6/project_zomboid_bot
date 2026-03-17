@@ -55,6 +55,7 @@ except:
     ALLOWED_CHANNELS = []
 intents = discord.Intents.default()
 intents.members = True
+intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 access_levels = ['admin', 'none', 'moderator']
 block_notified = list()
@@ -520,9 +521,6 @@ class ModeratorCommands(commands.Cog):
         await ctx.send(response)  
 
 
-bot.add_cog(AdminCommands())
-bot.add_cog(ModeratorCommands())
-
 class UserCommands(commands.Cog):
     """Commands open to users"""
     @commands.command(pass_context=True)
@@ -645,8 +643,6 @@ class UserCommands(commands.Cog):
             return
             #await ctx.message.author.send(f"Your request user {user} has been created\nPassword: password\nServer Address: {SERVER_ADDRESS}")
 
-bot.add_cog(UserCommands())
-
 async def pzplayers():
     plist = list()
     c_run = ""
@@ -670,6 +666,12 @@ async def status_task():
         else:
             await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"Server offline"))
         await asyncio.sleep(20)
+
+@bot.event
+async def setup_hook():
+    await bot.add_cog(AdminCommands())
+    await bot.add_cog(ModeratorCommands())
+    await bot.add_cog(UserCommands())
 
 @bot.event
 async def on_ready():
