@@ -40,13 +40,19 @@ PZ_CONTAINER_NAME = os.getenv('PZ_CONTAINER_NAME', 'projectzomboid')
 ADMIN_ROLES = ADMIN_ROLES.split(',')
 WHITELIST_ROLES = WHITELIST_ROLES.split(',')
 IGNORE_CHANNELS = os.getenv('IGNORE_CHANNELS')
+ALLOWED_CHANNELS = os.getenv('ALLOWED_CHANNELS')
 SERVER_ADDRESS = os.getenv('SERVER_ADDRESS')
 NOTIFICATION_CHANNEL = os.getenv('NOTIFICATION_CHANNEL')
 
 try:
     IGNORE_CHANNELS = IGNORE_CHANNELS.split(',')
-except: 
-    IGNORE_CHANNELS = ""
+except:
+    IGNORE_CHANNELS = []
+
+try:
+    ALLOWED_CHANNELS = [c.strip() for c in ALLOWED_CHANNELS.split(',') if c.strip()]
+except:
+    ALLOWED_CHANNELS = []
 intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix='!', intents=intents)
@@ -259,8 +265,13 @@ async def chunks(lst, n):
 
 async def IsChannelAllowed(ctx):
     channel_name = str(ctx.message.channel)
-    is_present = [i for i in IGNORE_CHANNELS if i.lower() == channel_name.lower()]
-    if channel_name in IGNORE_CHANNELS:
+    if ALLOWED_CHANNELS:
+        if not any(c.lower() == channel_name.lower() for c in ALLOWED_CHANNELS):
+            if channel_name not in block_notified:
+                await ctx.send("Not allowed to run commands in this channel")
+                block_notified.append(channel_name)
+            raise Exception("Not allowed to operate in channel")
+    elif channel_name in IGNORE_CHANNELS:
         if channel_name not in block_notified:
             await ctx.send("Not allowed to run commands in this channel")
             block_notified.append(channel_name)

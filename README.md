@@ -182,7 +182,8 @@ All other Discord members (no matching role) can only run the read-only `UserCom
 |---|---|
 | `NOTIFICATION_CHANNEL` | Channel ID where join, leave, and death events are posted by `pzwatcher.py` |
 | `INGAME_CHANNEL` | (Optional) Channel ID attached to in-game chat. Leave unset if using PZ's built-in Discord integration |
-| `IGNORE_CHANNELS` | Comma-separated channel **names** where bot commands are silently blocked |
+| `ALLOWED_CHANNELS` | (Optional) Comma-separated channel **names** where the bot listens for commands. When set, all other channels are ignored. Recommended over `IGNORE_CHANNELS` |
+| `IGNORE_CHANNELS` | (Optional) Comma-separated channel **names** to block commands in. Only used when `ALLOWED_CHANNELS` is not set |
 
 ## Other
 
