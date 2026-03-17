@@ -231,13 +231,17 @@ async def restart_server(ctx):
     try:
         docker_client = docker.from_env()
         container = docker_client.containers.get(PZ_CONTAINER_NAME)
-        container.restart(timeout=30)
     except docker.errors.NotFound:
         await ctx.send(f"Error: container '{PZ_CONTAINER_NAME}' not found.")
         return
     except Exception as e:
-        await ctx.send(f"Error restarting container: {e}")
+        await ctx.send(f"Error connecting to Docker: {e}")
         return
+
+    try:
+        await asyncio.to_thread(container.restart, timeout=30)
+    except Exception as e:
+        await ctx.send(f"Warning: restart call returned an error ({e}), server may still be restarting.")
 
     await ctx.send("Container restarted. Waiting for RCON...")
     server_up = False
@@ -646,6 +650,8 @@ async def pzplayers():
     plist = list()
     c_run = ""
     c_run = await rcon_command(None, ["players"])
+    if not c_run:
+        return 0
     c_run = c_run.split('\n')[1:-1]
     return len(c_run)
 
