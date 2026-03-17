@@ -185,15 +185,16 @@ async def getalldeaths(ctx):
 
 
 async def getmods():
-    modlist = list()
-    with open(os.path.join(os.path.split(LOG_PATH)[0],"Server",f"{SERVER_NAME}.ini"), 'r') as file:
-        for line in file:
-            if "Mods=" in line:
-                mods_split = line.split("=")
-                if len(mods_split) > 1:
-                    mods_list_split = mods_split[1].split(';')
-                    for mod in mods_list_split:
-                        modlist.append(mod)
+    response = await rcon_command(None, ["getoptions"])
+    if not response:
+        return ""
+    modlist = []
+    for line in response.splitlines():
+        if line.startswith("Mods="):
+            mods = line.split("=", 1)[1].strip()
+            if mods:
+                modlist = [m for m in mods.split(";") if m.strip()]
+            break
     return "\n".join(modlist)
 
 
