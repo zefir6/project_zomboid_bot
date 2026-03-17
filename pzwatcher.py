@@ -42,8 +42,8 @@ from watchgod import awatch
 async def logwatcher():
     await client.wait_until_ready()
     counter = 0
-    nchannel = client.get_channel(id=int(NOTIFICATION_CHANNEL))
-    ichannel = client.get_channel(id=int(INGAME_CHANNEL)) if INGAME_CHANNEL else None
+    nchannel = client.get_channel(int(NOTIFICATION_CHANNEL))
+    ichannel = client.get_channel(int(INGAME_CHANNEL)) if INGAME_CHANNEL else None
     async for changes in awatch(LOG_PATH):
         found_files = list()
         for p in changes:
