@@ -537,14 +537,17 @@ class ModeratorCommands(commands.Cog):
         log_header = re.compile(r'^[A-Z]+\s*:')
 
         log_files = []
-        for root, dirs, files in os.walk(LOG_PATH):
-            for f in files:
-                if f.endswith('.txt'):
-                    path = os.path.join(root, f)
-                    log_files.append((os.path.getmtime(path), path))
+        search_dirs = [LOG_PATH, os.path.dirname(LOG_PATH)]
+        for search_dir in search_dirs:
+            for root, dirs, files in os.walk(search_dir):
+                for f in files:
+                    if f.endswith('.txt'):
+                        path = os.path.join(root, f)
+                        if path not in [p for _, p in log_files]:
+                            log_files.append((os.path.getmtime(path), path))
         log_files.sort(reverse=True)
 
-        print(f"pzlasterrors: found {len(log_files)} log files in {LOG_PATH}")
+        print(f"pzlasterrors: found {len(log_files)} log files")
 
         all_errors = []
         for _, path in log_files:
