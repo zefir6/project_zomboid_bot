@@ -18,7 +18,7 @@ import socket
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import discord
-from discord.ext import commands, tasks
+
 from dotenv import load_dotenv
 from file_read_backwards import FileReadBackwards
 import datetime
@@ -29,11 +29,9 @@ GUILD = os.getenv('DISCORD_GUILD')
 LOG_PATH = os.getenv('LOG_PATH', "/home/steam/Zomboid/Logs")
 NOTIFICATION_CHANNEL = os.getenv('NOTIFICATION_CHANNEL')
 INGAME_CHANNEL = os.getenv('INGAME_CHANNEL')
-bot = commands.Bot(command_prefix='!')
-access_levels = ['admin', 'none', 'moderator']
 intents = discord.Intents.default()
 intents.members = True
-client = discord.Client()
+client = discord.Client(intents=intents)
 
 
 import asyncio
@@ -91,12 +89,6 @@ async def PlayerCheck(lfile, channel):
                 break
     except Exception as e:
         print(e)
-
-
-
-async def IsAdmin(ctx):
-    is_present = [i for i in ctx.author.roles if i.name in ADMIN_ROLES]
-    return is_present
 
 
 
